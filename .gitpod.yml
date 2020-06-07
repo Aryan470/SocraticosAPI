@@ -1,3 +1,3 @@
 tasks:
-  - init: mvn -f ./socraticos-api/pom.xml clean install
+  - init: echo "started"
 image: gitpod/workspace-full
