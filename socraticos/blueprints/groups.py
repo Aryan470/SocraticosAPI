@@ -33,7 +33,7 @@ def chatHistory(groupID):
     group = doc_ref.get()
     if group.exists:
         chatHist = doc_ref.collection("chatHistory").limit(maxResults).stream()
-        return jsonify([msg.to_dict for msg in chatHist])
+        return jsonify([msg.to_dict() for msg in chatHist])
     else:
         abort(404, "Group not found")
 
@@ -55,7 +55,8 @@ def pinMessage(groupID, messageID):
         msg = msg_ref.get()
         if msg.exists:
             pinned_msg_ref = doc_ref.collection("pinnedHistory").document(msg.get("messageID"))
-            pinned_msg_ref.set(msg)
+            pinned_msg_ref.set(msg.to_dict())
+            return msg.to_dict()
         else:
             abort(404, "Message not found")
     else:

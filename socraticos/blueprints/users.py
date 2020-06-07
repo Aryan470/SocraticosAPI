@@ -28,7 +28,7 @@ def register():
     content = request.json
     uid = str(uuid.uuid4())
 
-    if not content or content["name"] or not content["email"] or not content["desc"]:
+    if not content or not content["name"] or not content["email"] or not content["desc"]:
         abort(400, "Request must include JSON body with name, email, and desc")
 
     source = {
