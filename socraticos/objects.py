@@ -1,5 +1,3 @@
-import uuid
-
 class User(object):
     def __init__(self, name:str, email:str, desc:str, userID:str, enrollments:list):
         self.name = name
@@ -9,7 +7,7 @@ class User(object):
         self.enrollments = enrollments
     
     @staticmethod
-    def from_dict(source:dict) -> User:
+    def from_dict(source:dict):
         return User(source["name"], source["email"], source["desc"], source["userID"], source["enrollments"])
     
     def to_dict(self) -> dict:
@@ -33,7 +31,7 @@ class Group(object):
         self.pinnedHistory = pinnedHistory
     
     @staticmethod
-    def from_dict(source:dict) -> Group:
+    def from_dict(source:dict):
         return User(source["name"], source["desc"], source["groupID"], source["mentors"], source["students"], source["chatHistory"], source["pinnedHistory"])
     
     def to_dict(self) -> dict:
@@ -56,7 +54,7 @@ class Message(object):
         self.timestamp = timestamp
     
     @staticmethod
-    def from_dict(source) -> User:
+    def from_dict(source):
         return User(source["messageID"], source["content"], source["authorID"], source["timestamp"])
     
     def to_dict(self) -> dict:
