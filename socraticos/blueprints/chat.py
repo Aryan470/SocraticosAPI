@@ -2,30 +2,47 @@ from socraticos import fireClient
 from socraticos.objects import Message
 import datetime
 import uuid
-from flask import Blueprint, request, jsonify
+from flask import Blueprint, request, session
 from flask_socketio import join_room, leave_room, send, emit
-
+from . import users
 from .. import socketio
 
-@socketio.on("connect", namespace="/chat")
-def connect():
-    emit('my response', {'data': 'Connected'})
+@socketio.on("myping")
+def myping(txt):
+    print(txt)
+    emit("mypong", {"data": txt + "b b b"})
 
-@socketio.on("join", namespace="/chat")
+@socketio.on('disconnect')
+def disconnect():
+    print('disconnected :(', request.sid)
+
+@socketio.on("join")
 def on_join(data):
-    name = data["name"]
-    group = data["group"]
+    user = users.getUser(data["USERID"])
+    groupID = data["GROUPID"]
 
-    join_room(group)
-    send(str("%s has joined the chat" % name), room=group)
+    session["user"] = user
+    session["groupID"] = groupID
 
-@socketio.on("leave", namespace="/chat")
+    join_room(groupID)
+    send(str("%s has joined the chat :)" % user["name"]), room=groupID)
+
+@socketio.on("message")
+def receiveMessage(messageText):
+    user = session["user"]
+    groupID = session["groupID"]
+
+    logMessage(messageText, user["userID"], groupID)
+    resp = "%s: %s" % (user["name"], messageText)
+    send(resp, room=groupID)
+
+@socketio.on("leave")
 def on_leave(data):
-    name = data["name"]
-    group = data["group"]
+    name = session["user"]["name"]
+    groupID = session["groupID"]
 
-    leave_room(group)
-    send(str("%s has left the chat" % name), room=group)
+    leave_room(groupID)
+    send(str("%s has left the chat :(" % name), room=groupID)
 
 def logMessage(content: str, authorID: str, groupID: str):
     messageID = str(uuid.uuid4())
@@ -33,6 +50,6 @@ def logMessage(content: str, authorID: str, groupID: str):
     msg = Message(messageID, content, authorID, timestamp)
     groupRef = fireClient.collection("groups").document(groupID)
     if groupRef.get().exists:
-        groupRef.collection("chatHistory").document(messageID).set(msg.to_dict)
+        groupRef.collection("chatHistory").document(messageID).set(msg.to_dict())
     else:
         raise FileNotFoundError("Group does not exist")
