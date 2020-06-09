@@ -5,4 +5,4 @@ port = os.environ["PORT"]
 if not port:
   port = 7000
 
-socketio.run(create_app(), port=port, debug=True)
+socketio.run(create_app(), port=port, debug=True, host="0.0.0.0")
