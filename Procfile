@@ -1,1 +1,1 @@
-web: gunicorn --worker-class eventlet -w 1 app:gapp
+web: python app.py
