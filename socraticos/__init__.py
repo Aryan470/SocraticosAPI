@@ -1,9 +1,9 @@
 from firebase_admin import credentials, firestore
 import firebase_admin
-import os
+import json, os
 
 
-cred = credentials.Certificate(json.load(os.environ["PROJECT_AUTH"])))
+cred = credentials.Certificate(json.loads(os.environ["PROJECT_AUTH"]))
 firebase_admin.initialize_app(cred)
 fireClient = firestore.client()
 
