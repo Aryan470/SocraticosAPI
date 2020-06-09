@@ -1,0 +1,35 @@
+<html>
+	<body>
+        <input type="text" id="messageBox" placeholder="Type a message and hit enter..." style="width:100%">
+        <div id=output></div>
+		<script src="https://cdnjs.cloudflare.com/ajax/libs/socket.io/2.2.0/socket.io.js" integrity="sha256-yr4fRk/GU1ehYJPAs8P4JlTgu0Hdsp4ZKrx8bDEDC3I=" crossorigin="anonymous"></script>
+		<script language="javascript" type="text/javascript">
+		// var url = "https://7000-c2d3783d-3ede-40e6-aadc-fe872d702992.ws-us02.gitpod.io";
+		// var url = "https://socraticos.herokuapp.com";
+		var socket = io();
+		socket.on("connect", () => {
+            console.log("connected!");
+        });
+        socket.on("message", (text) => {
+            var newEntry = document.createElement("p");
+            newEntry.innerText = text;
+            document.getElementById("output").prepend(newEntry);
+        });
+
+        var userID = prompt("Enter userID", "fa780a94-ff7e-47f1-9158-cb4e96aa305f");
+        var groupID = prompt("Enter groupID", "compsci");
+        socket.emit("join", {"USERID": userID, "GROUPID": groupID});
+
+        const messageBox = document.getElementById("messageBox");
+        messageBox.addEventListener("keydown", (e) => {
+            if (e.keyCode == 13) {
+                const msg = messageBox.value;
+                socket.send(msg);
+                messageBox.value = "";
+            }
+        });
+
+		</script>
+	</body>
+	
+</html>
