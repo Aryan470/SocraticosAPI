@@ -1,1 +1,1 @@
-web: gunicorn --worker-class eventlet -w 1 module:socraticos
+web: gunicorn --worker-class eventlet -w 1 socraticos:app
