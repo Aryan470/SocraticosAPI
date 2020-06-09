@@ -2,10 +2,14 @@ from socraticos import fireClient
 from socraticos.objects import Message
 import datetime
 import uuid
-from flask import Blueprint, request
-from flask_socketio import join_room, leave_room, send
+from flask import Blueprint, request, jsonify
+from flask_socketio import join_room, leave_room, send, emit
 
 from .. import socketio
+
+@socketio.on("connect", namespace="/chat")
+def connect():
+    emit('my response', {'data': 'Connected'})
 
 @socketio.on("join", namespace="/chat")
 def on_join(data):

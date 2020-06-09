@@ -12,7 +12,7 @@ from flask_socketio import SocketIO
 
 socketio = SocketIO(logger=True)
 
-from socraticos.blueprints import users, groups
+from socraticos.blueprints import users, groups, chat
 
 
 def create_app():
