@@ -27,6 +27,16 @@ def listGroups():
     groups = fireClient.collection("groups").stream()
     return jsonify([group.to_dict() for group in groups])
 
+@groups.route("/batch", methods=["GET"])
+def batchGroups():
+    content = request.json
+    if not content or not content["groupIDs"]:
+        abort(400, "Request must include JSON body of groupID array")
+    groupsCollection = fireClient.collection("groups")
+    # TODO: use transactions instead
+    groupList = [getGroup(groupID) for groupID in content["groupIDs"]]
+    return jsonify(groupList)
+
 @groups.route("/create", methods=["POST"])
 def createGroup():
     content = request.json
@@ -39,8 +49,6 @@ def createGroup():
     source = {
         "title": content["title"],
         "description": content["description"],
-        "pinnedHistory": [],
-        "chatHistory": [],
         "students": [],
         "mentors": [], # This should be set to the creator of the group
         "tags": tags,
