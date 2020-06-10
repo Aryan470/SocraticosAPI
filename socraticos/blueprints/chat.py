@@ -1,20 +1,10 @@
 from socraticos import fireClient
-from socraticos.objects import Message
 import datetime
 import uuid
 from flask import Blueprint, request, session
 from flask_socketio import join_room, leave_room, send, emit
 from . import users
 from .. import socketio
-
-@socketio.on("myping")
-def myping(txt):
-    print(txt)
-    emit("mypong", {"data": txt + "b b b"})
-
-@socketio.on('disconnect')
-def disconnect():
-    print('disconnected :(', request.sid)
 
 @socketio.on("join")
 def on_join(data):
@@ -47,9 +37,14 @@ def on_leave(data):
 def logMessage(content: str, authorID: str, groupID: str):
     messageID = str(uuid.uuid4())
     timestamp = str(datetime.datetime.now())
-    msg = Message(messageID, content, authorID, timestamp)
+    source = {
+        "messageID": messageID,
+        "timestamp": timestamp,
+        "authorID": authorID,
+        "content": content,
+    }
     groupRef = fireClient.collection("groups").document(groupID)
     if groupRef.get().exists:
-        groupRef.collection("chatHistory").document(messageID).set(msg.to_dict())
+        groupRef.collection("chatHistory").document(messageID).set(source)
     else:
         raise FileNotFoundError("Group does not exist")
