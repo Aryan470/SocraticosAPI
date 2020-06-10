@@ -45,7 +45,8 @@ def register():
         "userID": uid,
         "enrollments": [],
         "mentorships": [],
-        "tags": taglist
+        "tags": taglist,
+        "admin": False
     }
 
     fireClient.collection("users").document(uid).set(source)
