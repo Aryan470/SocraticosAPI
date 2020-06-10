@@ -1,5 +1,6 @@
 from flask import Blueprint, request, abort, jsonify
 from socraticos import fireClient
+import uuid
 
 groups = Blueprint("groups", __name__)
 
@@ -25,6 +26,29 @@ def search():
 def listGroups():
     groups = fireClient.collection("groups").stream()
     return jsonify([group.to_dict() for group in groups])
+
+@groups.route("/create", methods=["POST"])
+def createGroup():
+    content = request.json
+    if not content or not content["title"] or not content["description"]:
+        abort(400, "Group needs title and description")
+    
+    tags = [tag for tag in content["title"].split()]
+    groupID = str(uuid.uuid4())
+    
+    source = {
+        "title": content["title"],
+        "description": content["description"],
+        "pinnedHistory": [],
+        "chatHistory": [],
+        "students": [],
+        "mentors": [], # This should be set to the creator of the group
+        "tags": tags,
+        "groupID": groupID
+    }
+
+    fireClient.collection("groups").document(groupID).set(source)
+    return source
 
 @groups.route("/chatHistory/<groupID>", methods=["GET"])
 def chatHistory(groupID):
