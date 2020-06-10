@@ -15,11 +15,11 @@ def getGroup(groupID):
 
 @groups.route("/search", methods=["GET"])
 def search():
-    query:str = request.args.get("query", default="", type=str)
+    query:str = request.args.get("query", default="", type=str).lower()
     maxResults:int = request.args.get("maxResults", default=10, type=int)
     if not query:
         abort(400, "Request must include query (group name)")
-    results = fireClient.collection("groups").where("name", "==", query).limit(maxResults)
+    results = fireClient.collection("groups").where("tags", "array_contains_any", query.split()).limit(maxResults)
     return jsonify([group.to_dict() for group in results.stream()])
 
 @groups.route("/list", methods=["GET"])
@@ -43,7 +43,7 @@ def createGroup():
     if not content or not content["title"] or not content["description"]:
         abort(400, "Group needs title and description")
     
-    tags = [tag for tag in content["title"].split()]
+    tags = [tag for tag in content["title"].lower().split()]
     groupID = str(uuid.uuid4())
     
     source = {

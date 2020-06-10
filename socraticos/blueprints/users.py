@@ -21,11 +21,11 @@ def getBatch():
 
 @users.route("/search", methods=["GET"])
 def search():
-    query:str = request.args.get("query", default="", type=str)
+    query:str = request.args.get("query", default="", type=str).lower()
     maxResults:int = request.args.get("maxResults", default=10, type=int)
     if not query:
         abort(400, "Request must include query (full name)")
-    results = fireClient.collection("users").where("name", "==", query).limit(maxResults)
+    results = fireClient.collection("users").where("tags", "array_contains_any", query.split()).limit(maxResults)
     return jsonify([userDoc.to_dict() for userDoc in results.stream()])
 
 @users.route("/register", methods=["POST"])
@@ -36,7 +36,7 @@ def register():
     if not content or not content["name"] or not content["email"] or not content["desc"]:
         abort(400, "Request must include JSON body with name, email, and desc")
     
-    taglist = [tag for tag in content["name"].split()]
+    taglist = [tag for tag in content["name"].lower().split()]
 
     source = {
         "name": content["name"],
