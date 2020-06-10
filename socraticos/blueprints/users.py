@@ -14,6 +14,12 @@ def getUser(userID):
     else:
         abort(404, "User not found")
 
+@users.route("/batch", methods=["GET"])
+def getBatch():
+    userIDs = request.json["userIDs"]
+    userList = [getUser(uid) for uid in userIDs]
+    return jsonify(userList)
+
 @users.route("/search", methods=["GET"])
 def search():
     query:str = request.args.get("query", default="", type=str)
