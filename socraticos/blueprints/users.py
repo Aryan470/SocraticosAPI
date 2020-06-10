@@ -36,13 +36,16 @@ def register():
 
     if not content or not content["name"] or not content["email"] or not content["desc"]:
         abort(400, "Request must include JSON body with name, email, and desc")
+    
+    taglist = [tag for tag in content["name"].split()]
 
     source = {
         "name": content["name"],
         "email": content["email"],
         "desc": content["desc"],
         "userID": uid,
-        "enrollments": []
+        "enrollments": [],
+        "tags": taglist
     }
 
     fireClient.collection("users").document(uid).set(source)
