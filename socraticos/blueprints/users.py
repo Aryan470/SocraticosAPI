@@ -1,6 +1,5 @@
 from flask import Blueprint, request, abort, jsonify
 from socraticos import fireClient
-import socraticos.objects
 import uuid
 
 users = Blueprint("users", __name__)
@@ -45,6 +44,7 @@ def register():
         "desc": content["desc"],
         "userID": uid,
         "enrollments": [],
+        "mentorships": [],
         "tags": taglist
     }
 
