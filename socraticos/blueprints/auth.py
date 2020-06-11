@@ -25,5 +25,5 @@ def login():
 
 @auth.route("/logout", methods=["POST"])
 def logout():
-    session.clear()
+    session.pop("userID", None)
     return jsonify(success=True)
