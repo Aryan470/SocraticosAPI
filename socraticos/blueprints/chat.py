@@ -13,11 +13,7 @@ def on_join(data):
     user = users.getUser(session["userID"])
     groupID = data["GROUPID"]
 
-<<<<<<< HEAD
     if groupID not in user["enrollments"] and groupID not in user["mentorships"] and not user["admin"]:
-=======
-    if groupID not in user["enrollments"] or groupID not in user["mentorships"]:
->>>>>>> e3019a515f5632f8d84421d88951a8b025eae07e
         return ConnectionRefusedError("User is not a student or mentor in the requested group")
 
     session["user"] = user
