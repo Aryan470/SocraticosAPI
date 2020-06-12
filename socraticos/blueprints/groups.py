@@ -79,6 +79,41 @@ def pinnedHistory(groupID):
     else:
         abort(404, "Group not found")
 
+@groups.route("/join/<groupID>", methods=["POST"])
+def joinGroup(groupID):
+    group_ref = fireClient.collection("groups").document(groupID)
+    group = group_ref.get()
+    if not group.exists:
+        abort(404, "Group not found")
+    group_info = group.to_dict()
+    content = request.json
+    if not content or not content["role"] or not content["userID"]:
+        abort(400, "Request must include JSON body specifying desired role and user ID")
+    role = content["role"]
+    userID = content["userID"]
+
+    if role != "student" and role != "mentor":
+        abort(400, "Role must either be student or mentor")
+
+    user_ref = fireClient.collection("users").document(userID)
+    user = user_ref.get()
+    if not user.exists:
+        abort(404, "User not found")
+    
+    user_info = user.to_dict()
+    if role == "student":
+        user_info["enrollments"].append(groupID)
+        group_info["students"].append(userID)
+    elif role == "mentor":
+        user_info["mentorships"].append(groupID)
+        group_info["mentors"].append(userID)
+    
+    user_ref.set(user_info)
+    group_ref.set(group_info)
+
+    return jsonify(success=True)
+
+
 @groups.route("/pin/<groupID>/<messageID>", methods=["POST"])
 def pinMessage(groupID, messageID):
     doc_ref = fireClient.collection("groups").document(groupID)
