@@ -5,6 +5,19 @@ import uuid
 
 auth = Blueprint("auth", __name__)
 
+@auth.route("/testlogin", methods=["POST"])
+def test_login():
+    content = request.json
+    if not content or not content["token"]:
+        abort(400, "Request must include JSON body with Firebase ID token")
+    
+    uid = content["token"]
+    user = fireClient.collection("users").document(uid).get()
+    if not user.exists:
+        abort(400, "User does not exist")
+    session["userID"] = uid
+    return jsonify(success=True)
+
 @auth.route("/login", methods=["POST"])
 def login():
     content = request.json

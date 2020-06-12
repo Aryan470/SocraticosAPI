@@ -28,6 +28,11 @@ def search():
     results = fireClient.collection("users").where("tags", "array_contains_any", query.split()).limit(maxResults)
     return jsonify([userDoc.to_dict() for userDoc in results.stream()])
 
+@users.route("/participations/<userID>", methods=["GET"])
+def participations(userID):
+    user = getUser(userID)
+    return jsonify(user["enrollments"] + user["mentorships"])
+
 @users.route("/register", methods=["POST"])
 def register():
     content = request.json

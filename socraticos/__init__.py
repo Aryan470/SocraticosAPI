@@ -1,4 +1,5 @@
 from firebase_admin import credentials, firestore
+from flask_cors import CORS
 import firebase_admin
 import json, os
 
@@ -17,6 +18,9 @@ from socraticos.blueprints import users, groups, chat, auth
 
 def create_app():
     app = Flask(__name__)
+    # TODO: CHANGE THIS!!!
+    app.secret_key = "DEVELOPMENT"
+    CORS(app)
     app.register_blueprint(users.users, url_prefix="/users")
     app.register_blueprint(groups.groups, url_prefix="/groups")
     app.register_blueprint(auth.auth, url_prefix="/auth")
