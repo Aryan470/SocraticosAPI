@@ -1,4 +1,4 @@
-from flask import Blueprint, request, abort, jsonify
+from flask import Blueprint, request, abort, jsonify, session
 from socraticos import fireClient
 import uuid
 
@@ -62,10 +62,18 @@ def createGroup():
 def chatHistory(groupID):
     maxResults:int = request.args.get("maxResults", default=10, type=int)
     doc_ref = fireClient.collection("groups").document(groupID)
+
+    if not session["userID"]:
+        abort(401, "Must be logged in to access chat history")
+    uid = session["userID"]
+
     group = doc_ref.get()
     if group.exists:
-        chatHist = doc_ref.collection("chatHistory").limit(maxResults).stream()
-        return jsonify([msg.to_dict() for msg in chatHist])
+        if uid in group["students"] or uid in group["mentors"]:
+            chatHist = doc_ref.collection("chatHistory").limit(maxResults).stream()
+            return jsonify([msg.to_dict() for msg in chatHist])
+        else:
+            abort(401, "Must be a student or mentor in the group to view chat history")
     else:
         abort(404, "Group not found")
 
