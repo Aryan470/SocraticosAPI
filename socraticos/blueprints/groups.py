@@ -89,6 +89,10 @@ def pinnedHistory(groupID):
 
 @groups.route("/join/<groupID>", methods=["POST"])
 def joinGroup(groupID):
+    if not session["userID"]:
+        abort(403, "Must be logged in to join group")
+    
+    userID = session["userID"]
     group_ref = fireClient.collection("groups").document(groupID)
     group = group_ref.get()
     if not group.exists:
@@ -98,7 +102,6 @@ def joinGroup(groupID):
     if not content or not content["role"] or not content["userID"]:
         abort(400, "Request must include JSON body specifying desired role and user ID")
     role = content["role"]
-    userID = content["userID"]
 
     if role != "student" and role != "mentor":
         abort(400, "Role must either be student or mentor")
