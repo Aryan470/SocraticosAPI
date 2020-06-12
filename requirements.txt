@@ -1,4 +1,5 @@
 flask
 firebase-admin
 flask-socketio
+flask-cors
 eventlet
