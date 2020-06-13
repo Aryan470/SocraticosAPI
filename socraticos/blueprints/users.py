@@ -1,6 +1,7 @@
 from flask import Blueprint, request, abort, jsonify
 from socraticos import fireClient
 import uuid
+from firebase_admin.auth import verify_id_token
 
 users = Blueprint("users", __name__)
 
@@ -36,13 +37,21 @@ def participations(userID):
 @users.route("/register", methods=["POST"])
 def register():
     content = request.json
-    uid = str(uuid.uuid4())
 
-    if not content or not content["name"] or not content["email"] or not content["desc"]:
-        abort(400, "Request must include JSON body with name, email, and desc")
-    
+    if not content or not content["token"] or not content["name"] or not content["email"] or not content["desc"]:
+        abort(400, "Request must include json body with token, name, email, and description")
+    token = content["token"]
+    try:
+        result = verify_id_token(token)
+    except:
+        abort(400, "Invalid firebase JWT")
+    uid = result["uid"]
+
+    user_ref = fireClient.collection("users").document(uid)
+    if user_ref.get().exists:
+        abort(403, "User already exists")
+
     taglist = [tag for tag in content["name"].lower().split()]
-
     source = {
         "name": content["name"],
         "email": content["email"],
