@@ -8,7 +8,7 @@ from .. import socketio
 
 @socketio.on("join")
 def on_join(data):
-    if not session["userID"]:
+    if "userID" not in session:
         return ConnectionRefusedError("Must be logged in to join chat")
     user = users.getUser(session["userID"])
     groupID = data["GROUPID"]
