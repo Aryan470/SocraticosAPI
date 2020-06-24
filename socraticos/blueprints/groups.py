@@ -99,8 +99,8 @@ def joinGroup(groupID):
         abort(404, "Group not found")
     group_info = group.to_dict()
     content = request.json
-    if not content or not content["role"] or not content["userID"]:
-        abort(400, "Request must include JSON body specifying desired role and user ID")
+    if not content or not content["role"]:
+        abort(400, "Request must include JSON body specifying desired role")
     role = content["role"]
 
     if role != "student" and role != "mentor":
