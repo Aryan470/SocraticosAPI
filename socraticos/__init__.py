@@ -11,7 +11,7 @@ fireClient = firestore.client()
 from flask import Flask, render_template, session, redirect, request
 from flask_socketio import SocketIO
 
-socketio = SocketIO(logger=True)
+socketio = SocketIO(logger=True, manage_session=True)
 
 from socraticos.blueprints import users, groups, chat, auth
 
