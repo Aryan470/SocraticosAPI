@@ -22,14 +22,13 @@ def on_join(data):
     join_room(groupID)
     send(str("%s has joined the chat." % user["name"]), room=groupID)
 
-@socketio.on("message")
+@socketio.on("newMessage")
 def receiveMessage(messageText):
     user = session["user"]
     groupID = session["groupID"]
 
-    logMessage(messageText, user["userID"], groupID)
-    resp = "%s: %s" % (user["name"], messageText)
-    send(resp, room=groupID)
+    msg_data = logMessage(messageText, user["userID"], groupID)
+    emit("newMessage", msg_data, room=groupID)
 
 @socketio.on("leave")
 def on_leave(data):
@@ -56,3 +55,4 @@ def logMessage(content: str, authorID: str, groupID: str):
         groupRef.collection("chatHistory").document(messageID).set(source)
     else:
         raise FileNotFoundError("Group does not exist")
+    return source
