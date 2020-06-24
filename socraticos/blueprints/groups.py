@@ -69,7 +69,8 @@ def chatHistory(groupID):
 
     group = doc_ref.get()
     if group.exists:
-        if uid in group["students"] or uid in group["mentors"]:
+        group_dict = group.to_dict()
+        if uid in group_dict["students"] or uid in group_dict["mentors"]:
             chatHist = doc_ref.collection("chatHistory").limit(maxResults).stream()
             return jsonify([msg.to_dict() for msg in chatHist])
         else:
