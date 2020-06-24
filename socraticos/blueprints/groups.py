@@ -40,7 +40,7 @@ def batchGroups():
 @groups.route("/create", methods=["POST"])
 def createGroup():
     content = request.json
-    if not content or not content["title"] or not content["description"]:
+    if not content or not "title" in content or not "description" in content:
         abort(400, "Group needs title and description")
     
     tags = [tag for tag in content["title"].lower().split()]
@@ -63,7 +63,7 @@ def chatHistory(groupID):
     maxResults:int = request.args.get("maxResults", default=10, type=int)
     doc_ref = fireClient.collection("groups").document(groupID)
 
-    if not session["userID"]:
+    if not "userID" in session:
         abort(401, "Must be logged in to access chat history")
     uid = session["userID"]
 
@@ -80,17 +80,24 @@ def chatHistory(groupID):
 
 @groups.route("/pinnedHistory/<groupID>", methods=["GET"])
 def pinnedHistory(groupID):
+    if not "userID" in session:
+        abort(401, "Must be logged in to access chat history")
+    uid = session["userID"]
+    
     maxResults:int = request.args.get("maxResults", default=10, type=int)
-    doc_ref = fireClient.collection("groups").document(groupID)
-    if doc_ref.get().exists:
+    group_info = fireClient.collection("groups").document(groupID).get()
+    if group_info.exists:
+        group_dict = group_info.to_dict()
+        if uid not in group_dict["students"] and uid not in group_dict["mentors"]:
+            abort(401, "Must be a student or mentor in the group to view pinned history")
         chatHist = doc_ref.collection("pinnedHistory").limit(maxResults).stream()
-        return jsonify([msg.to_dict for msg in chatHist])
+        return jsonify([msg.to_dict() for msg in chatHist])
     else:
         abort(404, "Group not found")
 
 @groups.route("/join/<groupID>", methods=["POST"])
 def joinGroup(groupID):
-    if not session["userID"]:
+    if "userID" not in session:
         abort(403, "Must be logged in to join group")
     
     userID = session["userID"]
