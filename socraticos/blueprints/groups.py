@@ -71,7 +71,7 @@ def chatHistory(groupID):
     if group.exists:
         group_dict = group.to_dict()
         if uid in group_dict["students"] or uid in group_dict["mentors"]:
-            chatHist = doc_ref.collection("chatHistory").limit(maxResults).stream()
+            chatHist = doc_ref.collection("chatHistory").order_by("timestamp", direction="DESCENDING").limit(maxResults).stream()
             return jsonify([msg.to_dict() for msg in chatHist])
         else:
             abort(401, "Must be a student or mentor in the group to view chat history")
@@ -90,7 +90,7 @@ def pinnedHistory(groupID):
         group_dict = group_info.to_dict()
         if uid not in group_dict["students"] and uid not in group_dict["mentors"]:
             abort(401, "Must be a student or mentor in the group to view pinned history")
-        chatHist = doc_ref.collection("pinnedHistory").limit(maxResults).stream()
+        chatHist = group_info.collection("pinnedHistory").order_by("timestamp", direction="DESCENDING").limit(maxResults).stream()
         return jsonify([msg.to_dict() for msg in chatHist])
     else:
         abort(404, "Group not found")
