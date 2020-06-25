@@ -106,6 +106,10 @@ def joinGroup(groupID):
     if not group.exists:
         abort(404, "Group not found")
     group_info = group.to_dict()
+
+    if userID in group_info["mentors"] or userID in group_info["students"]:
+        abort(400, "Cannot join group twice")
+
     content = request.json
     if not content or not content["role"]:
         abort(400, "Request must include JSON body specifying desired role")
