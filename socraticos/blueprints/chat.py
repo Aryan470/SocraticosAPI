@@ -42,7 +42,7 @@ def on_leave(data):
     send(str("%s has left the chat." % name), room=groupID)
 
 
-def pinMessage(messageID: str, authorID: str, groupID: str):
+def pinMessage(messageID: str, authorID: str, groupID: str, unpin: bool = False):
     group_ref = fireClient.collection("groups").document(groupID)
     group_obj = group_ref.get()
     if not group_obj.exists:
@@ -57,7 +57,7 @@ def pinMessage(messageID: str, authorID: str, groupID: str):
         raise FileNotFoundError("Message does not exist")
 
     source = msg_obj.to_dict()
-    source["pinned"] = True
+    source["pinned"] = not unpin
     msg_ref.set(source)
     return source
 

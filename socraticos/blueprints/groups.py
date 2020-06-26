@@ -138,13 +138,18 @@ def joinGroup(groupID):
     return jsonify(success=True)
 
 
-@groups.route("/pin/<groupID>/<messageID>", methods=["POST"])
+@groups.route("/setPin/<groupID>/<messageID>", methods=["POST"])
 def pinMessage(groupID, messageID):
     if "userID" not in session:
         abort(403, "Must be logged in to pin message")
 
+    content = request.json
+    unpin = False
+    if content and "unpin" in content:
+        unpin = content["unpin"]
+    
     try:
-        newMessage = chat.pinMessage(messageID, session["userID"], groupID)
+        newMessage = chat.pinMessage(messageID, session["userID"], groupID, unpin)
         return newMessage
     except FileNotFoundError:
         abort(404, "Group or message not found")
