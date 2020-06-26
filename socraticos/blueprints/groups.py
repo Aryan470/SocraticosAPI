@@ -1,5 +1,6 @@
 from flask import Blueprint, request, abort, jsonify, session
 from socraticos import fireClient
+from . import chat
 import uuid
 
 groups = Blueprint("groups", __name__)
@@ -90,7 +91,7 @@ def pinnedHistory(groupID):
         group_dict = group_info.to_dict()
         if uid not in group_dict["students"] and uid not in group_dict["mentors"]:
             abort(401, "Must be a student or mentor in the group to view pinned history")
-        chatHist = group_info.collection("pinnedHistory").order_by("timestamp", direction="DESCENDING").limit(maxResults).stream()
+        chatHist = group_info.collection("pinnedHistory").where("pinned", "==", True).order_by("timestamp", direction="DESCENDING").limit(maxResults).stream()
         return jsonify([msg.to_dict() for msg in chatHist])
     else:
         abort(404, "Group not found")
@@ -139,15 +140,15 @@ def joinGroup(groupID):
 
 @groups.route("/pin/<groupID>/<messageID>", methods=["POST"])
 def pinMessage(groupID, messageID):
-    doc_ref = fireClient.collection("groups").document(groupID)
-    if doc_ref.get().exists:
-        msg_ref = doc_ref.collection("chatHistory").document(messageID)
-        msg = msg_ref.get()
-        if msg.exists:
-            pinned_msg_ref = doc_ref.collection("pinnedHistory").document(msg.get("messageID"))
-            pinned_msg_ref.set(msg.to_dict())
-            return msg.to_dict()
-        else:
-            abort(404, "Message not found")
-    else:
-        abort(404, "Group not found")
+    if "userID" not in session:
+        abort(403, "Must be logged in to pin message")
+
+    try:
+        newMessage = chat.pinMessage(messageID, session["userID"], groupID)
+        return newMessage
+    except FileNotFoundError:
+        abort(404, "Group or message not found")
+    except PermissionError:
+        abort(403, "Must be logged in as mentor to pin message")
+    except:
+        abort(400)
