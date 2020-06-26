@@ -41,6 +41,26 @@ def on_leave(data):
     leave_room(groupID)
     send(str("%s has left the chat." % name), room=groupID)
 
+
+def pinMessage(messageID: str, authorID: str, groupID: str):
+    group_ref = fireClient.collection("groups").document(groupID)
+    group_obj = group_ref.get()
+    if not group_obj.exists:
+        raise FileNotFoundError("Group does not exist")
+
+    if authorID not in group_obj.get("mentors"):
+        raise PermissionError("Must be mentor to pin messages")
+
+    msg_ref = group_ref.collection("chatHistory").document(messageID)
+    msg_obj = msg_ref.get()
+    if not msg_obj.exists:
+        raise FileNotFoundError("Message does not exist")
+
+    source = msg_obj.to_dict()
+    source["pinned"] = True
+    msg_ref.set(source)
+    return source
+
 def logMessage(content: str, authorID: str, groupID: str):
     messageID = str(uuid.uuid4())
     timestamp = str(datetime.datetime.now())
@@ -49,6 +69,7 @@ def logMessage(content: str, authorID: str, groupID: str):
         "timestamp": timestamp,
         "authorID": authorID,
         "content": content,
+        "pinned": False
     }
     groupRef = fireClient.collection("groups").document(groupID)
     if groupRef.get().exists:
