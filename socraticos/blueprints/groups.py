@@ -86,12 +86,13 @@ def pinnedHistory(groupID):
     uid = session["userID"]
     
     maxResults:int = request.args.get("maxResults", default=10, type=int)
-    group_info = fireClient.collection("groups").document(groupID).get()
+    group_ref = fireClient.collection("groups").document(groupID)
+    group_info = group_ref.get()
     if group_info.exists:
         group_dict = group_info.to_dict()
         if uid not in group_dict["students"] and uid not in group_dict["mentors"]:
             abort(401, "Must be a student or mentor in the group to view pinned history")
-        chatHist = group_info.collection("pinnedHistory").where("pinned", "==", True).order_by("timestamp", direction="DESCENDING").limit(maxResults).stream()
+        chatHist = group_ref.collection("pinnedHistory").where("pinned", "==", True).order_by("timestamp", direction="DESCENDING").limit(maxResults).stream()
         return jsonify([msg.to_dict() for msg in chatHist])
     else:
         abort(404, "Group not found")
