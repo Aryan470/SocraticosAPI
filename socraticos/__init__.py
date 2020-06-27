@@ -18,6 +18,7 @@ from socraticos.blueprints import users, groups, chat, auth
 
 def create_app():
     app = Flask(__name__)
+    app.config['SESSION_COOKIE_HTTPONLY'] = False
 
     if "SECRET_KEY" in os.environ:
         app.secret_key = os.environ["SECRET_KEY"]
