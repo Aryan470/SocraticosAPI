@@ -19,7 +19,7 @@ def test_login():
     user = fireClient.collection("users").document(uid).get()
     if not user.exists:
         abort(400, "User does not exist")
-    session["userID"] = uid
+
     
     token_dict = {"userID": uid}
     return jsonify({"token": encodeFlaskCookie(getSecretKey(), token_dict), "success": True})
@@ -37,7 +37,7 @@ def login():
         user = fireClient.collection("users").document(uid).get()
         if not user.exists:
             abort(400, "User does not exist")
-        session["userID"] = uid
+
         token_dict = {"userID": uid}
         return jsonify({"token": encodeFlaskCookie(getSecretKey(), token_dict), "success": True})
     except:
