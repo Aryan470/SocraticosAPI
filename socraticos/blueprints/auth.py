@@ -38,7 +38,7 @@ def login():
         if not user.exists:
             abort(400, "User does not exist")
 
-	session["userID"] = uid
+        session["userID"] = uid
         token_dict = {"userID": uid}
         return jsonify({"token": encodeFlaskCookie(getSecretKey(), token_dict), "success": True})
     except:
