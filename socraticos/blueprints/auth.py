@@ -1,4 +1,8 @@
+from os import getenv
 from flask import Blueprint, request, abort, session, jsonify, render_template
+from flask.sessions import SecureCookieSessionInterface
+from itsdangerous import URLSafeTimedSerializer
+
 from firebase_admin.auth import verify_id_token
 from socraticos import fireClient
 import uuid
@@ -16,7 +20,9 @@ def test_login():
     if not user.exists:
         abort(400, "User does not exist")
     session["userID"] = uid
-    return jsonify(success=True)
+    
+    token_dict = {"userID": uid}
+    return jsonify({"token": encodeFlaskCookie(getSecretKey(), token_dict), "success": True})
 
 @auth.route("/login", methods=["POST"])
 def login():
@@ -32,7 +38,8 @@ def login():
         if not user.exists:
             abort(400, "User does not exist")
         session["userID"] = uid
-        return jsonify(success=True)
+        token_dict = {"userID": uid}
+        return jsonify({"token": encodeFlaskCookie(getSecretKey(), token_dict), "success": True})
     except:
         abort(400, "Invalid token")
 
@@ -40,3 +47,20 @@ def login():
 def logout():
     session.pop("userID", None)
     return jsonify(success=True)
+
+def getSecretKey():
+    return getenv("SECRET_KEY", "DEVELOPMENT")
+
+class SimpleSecureCookieSessionInterface(SecureCookieSessionInterface):
+	# Override method
+	# Take secret_key instead of an instance of a Flask app
+	def get_signing_serializer(self, secret_key):
+		if not secret_key:
+			return None
+		signer_kwargs = dict(key_derivation=self.key_derivation, digest_method=self.digest_method)
+		return URLSafeTimedSerializer(secret_key, salt=self.salt, serializer=self.serializer, signer_kwargs=signer_kwargs)
+
+def encodeFlaskCookie(secret_key, cookieDict):
+	sscsi = SimpleSecureCookieSessionInterface()
+	signingSerializer = sscsi.get_signing_serializer(secret_key)
+	return signingSerializer.dumps(cookieDict)
