@@ -24,7 +24,7 @@ def create_app():
         app.secret_key = os.environ["SECRET_KEY"]
     else:
         app.secret_key = "DEVELOPMENT"
-    CORS(app, origins=["https://piphi5.github.io/", "https://socraticos.herokuapp.com/"], supports_credentials=True)
+    CORS(app, origins=["https://piphi5.github.io", "https://socraticos.herokuapp.com"], supports_credentials=True)
     app.register_blueprint(users.users, url_prefix="/users")
     app.register_blueprint(groups.groups, url_prefix="/groups")
     app.register_blueprint(auth.auth, url_prefix="/auth")
