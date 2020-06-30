@@ -1,7 +1,9 @@
 from firebase_admin import credentials, firestore
 from flask_cors import CORS
+from flask import make_response
 import firebase_admin
 import json, os
+from jose import jws
 
 
 cred = credentials.Certificate(json.loads(os.environ["PROJECT_AUTH"]))
@@ -31,7 +33,24 @@ def create_app():
 
     @app.before_request
     def log_request_info():
-        app.logger.debug('JSON: %s', request.get_json())
+        json_body = request.get_json()
+        app.logger.debug('JSON: %s', json_body)
+        if json_body:
+            if "session" in json_body:
+                session_dict = json.loads(jws.verify(json_body["session"], app.secret_key, algorithms=["HS256"]))
+                for key in session_dict:
+                    session[key] = session_dict[key]
+
+
+    @app.after_request
+    def encodeSession(response):
+        body_data = response.get_json()
+        session_data = {}
+        for key in session:
+            session_data[key] = session[key]
+        print(body_data)
+        return make_response({"content": body_data, "session": jws.sign(session_data, app.secret_key, algorithm='HS256')})
+
 
     # Redirect to API documentation
     @app.route("/")

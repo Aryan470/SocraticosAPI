@@ -59,7 +59,7 @@ def createGroup():
     fireClient.collection("groups").document(groupID).set(source)
     return source
 
-@groups.route("/chatHistory/<groupID>", methods=["GET"])
+@groups.route("/chatHistory/<groupID>", methods=["POST"])
 def chatHistory(groupID):
     maxResults:int = request.args.get("maxResults", default=10, type=int)
     doc_ref = fireClient.collection("groups").document(groupID)
@@ -79,7 +79,7 @@ def chatHistory(groupID):
     else:
         abort(404, "Group not found")
 
-@groups.route("/pinnedHistory/<groupID>", methods=["GET"])
+@groups.route("/pinnedHistory/<groupID>", methods=["POST"])
 def pinnedHistory(groupID):
     if not "userID" in session:
         abort(401, "Must be logged in to access chat history")
