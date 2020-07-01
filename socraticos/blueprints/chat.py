@@ -11,6 +11,7 @@ import json
 
 @socketio.on("join")
 def on_join(data):
+    data = json.loads(data)
     session_dict = json.loads(jws.verify(data["session"], getSecretKey(), algorithms=["HS256"]))
     for key in session_dict:
         session[key] = session_dict[key]
@@ -46,6 +47,7 @@ def receiveMessage(data):
 
 @socketio.on("leave")
 def on_leave(data):
+    data = json.loads(data)
     session_dict = json.loads(jws.verify(data["session"], getSecretKey(), algorithms=["HS256"]))
     for key in session_dict:
         session[key] = session_dict[key]
