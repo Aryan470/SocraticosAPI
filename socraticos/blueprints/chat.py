@@ -7,6 +7,7 @@ from . import users
 from .. import socketio
 from jose import jws
 from os import environ
+import json
 
 @socketio.on("join")
 def on_join(data):
