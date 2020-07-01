@@ -61,5 +61,5 @@ def create_app():
     def st():
         return render_template("st.html")
     
-    socketio.init_app(app, cors_allow_origins="*")
+    socketio.init_app(app, cors_allowed_origins="*")
     return app
