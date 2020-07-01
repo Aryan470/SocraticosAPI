@@ -50,7 +50,8 @@ def create_app():
             for key in session:
                 session_data[key] = session[key]
             return make_response({"content": body_data, "session": jws.sign(session_data, app.secret_key, algorithm='HS256')})
-
+        else:
+            return response
 
     # Redirect to API documentation
     @app.route("/")
