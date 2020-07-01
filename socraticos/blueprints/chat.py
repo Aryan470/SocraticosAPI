@@ -10,7 +10,7 @@ from os import environ
 
 @socketio.on("join")
 def on_join(data):
-    session_dict = jws.verify(data["session"], getSecretKey(), algorithms=["HS256"])
+    session_dict = json.loads(jws.verify(data["session"], getSecretKey(), algorithms=["HS256"]))
     for key in session_dict:
         session[key] = session_dict["key"]
 
@@ -32,7 +32,7 @@ def on_join(data):
 @socketio.on("newMessage")
 def receiveMessage(data):
     messageText = data["text"]
-    session_dict = jws.verify(data["session"], getSecretKey(), algorithms=["HS256"])
+    session_dict = json.loads(jws.verify(data["session"], getSecretKey(), algorithms=["HS256"]))
     for key in session_dict:
         session[key] = session_dict["key"]
 
@@ -44,7 +44,7 @@ def receiveMessage(data):
 
 @socketio.on("leave")
 def on_leave(data):
-    session_dict = jws.verify(data["session"], getSecretKey(), algorithms=["HS256"])
+    session_dict = json.loads(jws.verify(data["session"], getSecretKey(), algorithms=["HS256"]))
     for key in session_dict:
         session[key] = session_dict["key"]
 
