@@ -44,11 +44,12 @@ def create_app():
 
     @app.after_request
     def encodeSession(response):
-        body_data = response.get_json()
-        session_data = {}
-        for key in session:
-            session_data[key] = session[key]
-        return make_response({"content": body_data, "session": jws.sign(session_data, app.secret_key, algorithm='HS256')})
+        if response.status == "200":
+            body_data = response.get_json()
+            session_data = {}
+            for key in session:
+                session_data[key] = session[key]
+            return make_response({"content": body_data, "session": jws.sign(session_data, app.secret_key, algorithm='HS256')})
 
 
     # Redirect to API documentation
