@@ -13,7 +13,7 @@ import json
 def on_join(data):
     session_dict = json.loads(jws.verify(data["session"], getSecretKey(), algorithms=["HS256"]))
     for key in session_dict:
-        session[key] = session_dict["key"]
+        session[key] = session_dict[key]
 
     if "userID" not in session:
         return ConnectionRefusedError("Must be logged in to join chat")
