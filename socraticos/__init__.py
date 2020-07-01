@@ -48,7 +48,6 @@ def create_app():
         session_data = {}
         for key in session:
             session_data[key] = session[key]
-        print(body_data)
         return make_response({"content": body_data, "session": jws.sign(session_data, app.secret_key, algorithm='HS256')})
 
 
