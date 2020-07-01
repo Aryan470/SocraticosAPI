@@ -26,7 +26,7 @@ def create_app():
         app.secret_key = os.environ["SECRET_KEY"]
     else:
         app.secret_key = "DEVELOPMENT"
-    CORS(app, supports_credentials=True)
+    CORS(app, cors_allowed_origins="*")
     app.register_blueprint(users.users, url_prefix="/users")
     app.register_blueprint(groups.groups, url_prefix="/groups")
     app.register_blueprint(auth.auth, url_prefix="/auth")
