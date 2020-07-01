@@ -35,7 +35,7 @@ def receiveMessage(data):
     messageText = data["text"]
     session_dict = json.loads(jws.verify(data["session"], getSecretKey(), algorithms=["HS256"]))
     for key in session_dict:
-        session[key] = session_dict["key"]
+        session[key] = session_dict[key]
 
     user = session["user"]
     groupID = session["groupID"]
@@ -47,7 +47,7 @@ def receiveMessage(data):
 def on_leave(data):
     session_dict = json.loads(jws.verify(data["session"], getSecretKey(), algorithms=["HS256"]))
     for key in session_dict:
-        session[key] = session_dict["key"]
+        session[key] = session_dict[key]
 
     name = session["user"]["name"]
     groupID = session["groupID"]
