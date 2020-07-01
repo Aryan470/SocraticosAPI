@@ -5,9 +5,15 @@ from flask import Blueprint, request, session
 from flask_socketio import join_room, leave_room, send, emit, ConnectionRefusedError
 from . import users
 from .. import socketio
+from jose import jws
+from os import environ
 
 @socketio.on("join")
 def on_join(data):
+    session_dict = jws.verify(data["session"], getSecretKey(), algorithms=["HS256"])
+    for key in session_dict:
+        session[key] = session_dict["key"]
+
     if "userID" not in session:
         return ConnectionRefusedError("Must be logged in to join chat")
     user = users.getUser(session["userID"])
@@ -20,10 +26,16 @@ def on_join(data):
     session["groupID"] = groupID
 
     join_room(groupID)
+    sendSession()
     send(str("%s has joined the chat." % user["name"]), room=groupID)
 
 @socketio.on("newMessage")
-def receiveMessage(messageText):
+def receiveMessage(data):
+    messageText = data["text"]
+    session_dict = jws.verify(data["session"], getSecretKey(), algorithms=["HS256"])
+    for key in session_dict:
+        session[key] = session_dict["key"]
+
     user = session["user"]
     groupID = session["groupID"]
 
@@ -32,6 +44,10 @@ def receiveMessage(messageText):
 
 @socketio.on("leave")
 def on_leave(data):
+    session_dict = jws.verify(data["session"], getSecretKey(), algorithms=["HS256"])
+    for key in session_dict:
+        session[key] = session_dict["key"]
+
     name = session["user"]["name"]
     groupID = session["groupID"]
 
@@ -39,8 +55,18 @@ def on_leave(data):
     session.pop("groupID", None)
 
     leave_room(groupID)
+    sendSession()
     send(str("%s has left the chat." % name), room=groupID)
 
+def sendSession():
+    # Encode session into string and send to client, called on join/leave
+    session_data = {}
+    for key in session:
+        session_data[key] = session[key]
+    emit("session", {"session": jws.sign(session_data, getSecretKey(), algorithm='HS256')})
+
+def getSecretKey():
+    return environ.get("SECRET_KEY", "DEVELOPMENT")
 
 def pinMessage(messageID: str, authorID: str, groupID: str, unpin: bool = False):
     group_ref = fireClient.collection("groups").document(groupID)
