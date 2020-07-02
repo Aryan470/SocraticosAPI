@@ -43,6 +43,7 @@ def receiveMessage(data):
     groupID = session["groupID"]
 
     msg_data = logMessage(messageText, user["userID"], groupID)
+    msg_data["authorName"] = user["name"]
     emit("newMessage", msg_data, room=groupID)
 
 @socketio.on("leave")
