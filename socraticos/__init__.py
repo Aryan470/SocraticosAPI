@@ -58,7 +58,7 @@ def create_app():
     # Redirect to API documentation
     @app.route("/")
     def index():
-        return redirect("https://documenter.getpostman.com/view/1242833/SzzhcxvZ?version=latest")
+        return redirect("https://piphi5.github.io/Socraticos-App/")
         
     ## FIXME: ONLY FOR DEVELOPMENT PURPOSES
     @app.route("/st")
