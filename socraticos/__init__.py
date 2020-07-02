@@ -44,7 +44,7 @@ def create_app():
 
     @app.after_request
     def encodeSession(response):
-        if response.status == 200:
+        if response.status_code == 200:
             body_data = response.get_json()
             session_data = {}
             for key in session:
