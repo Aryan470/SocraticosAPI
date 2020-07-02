@@ -36,6 +36,7 @@ def create_app():
         app.logger.debug('JSON: %s', json_body)
         if json_body:
             if "session" in json_body:
+                print("Session string:", json_body["session"])
                 session_dict = json.loads(jws.verify(json_body["session"], app.secret_key, algorithms=["HS256"]))
                 for key in session_dict:
                     session[key] = session_dict[key]
@@ -48,7 +49,9 @@ def create_app():
             session_data = {}
             for key in session:
                 session_data[key] = session[key]
-            return make_response({"content": body_data, "session": jws.sign(session_data, app.secret_key, algorithm='HS256')})
+            encoded_str = jws.sign(session_data, app.secret_key, algorithm='HS256')
+            print("Session string:", encoded_str)
+            return make_response({"content": body_data, "session": encoded_str})
         else:
             return make_response(response)
 
