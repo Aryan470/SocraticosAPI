@@ -79,8 +79,8 @@ def pinMessage(messageID: str, authorID: str, groupID: str, unpin: bool = False)
     if not group_obj.exists:
         raise FileNotFoundError("Group does not exist")
 
-    if authorID not in group_obj.get("mentors"):
-        raise PermissionError("Must be mentor to pin messages")
+    if authorID not in group_obj.get("mentors") and not in group_obj.get("students"):
+        raise PermissionError("Must be mentor or student to pin messages")
 
     msg_ref = group_ref.collection("chatHistory").document(messageID)
     msg_obj = msg_ref.get()
