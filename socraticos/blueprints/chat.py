@@ -42,8 +42,7 @@ def receiveMessage(data):
     user = session["user"]
     groupID = session["groupID"]
 
-    msg_data = logMessage(messageText, user["userID"], groupID)
-    msg_data["authorName"] = user["name"]
+    msg_data = logMessage(messageText, user, groupID)
     emit("newMessage", msg_data, room=groupID)
 
 @socketio.on("leave")
@@ -93,13 +92,14 @@ def pinMessage(messageID: str, authorID: str, groupID: str, unpin: bool = False)
     msg_ref.set(source)
     return source
 
-def logMessage(content: str, authorID: str, groupID: str):
+def logMessage(content: str, author: dict, groupID: str):
     messageID = str(uuid.uuid4())
     timestamp = str(datetime.datetime.now())
     source = {
         "messageID": messageID,
         "timestamp": timestamp,
-        "authorID": authorID,
+        "authorID": author["userID"],
+        "authorName": author["name"],
         "content": content,
         "pinned": False
     }
