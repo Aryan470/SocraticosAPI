@@ -60,7 +60,7 @@ def on_leave(data):
 
     leave_room(groupID)
     sendSession()
-    emit("leave")
+    emit("leave", groupID)
     send(str("%s has left the chat." % name), room=groupID)
 
 def sendSession():
