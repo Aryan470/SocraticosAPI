@@ -36,10 +36,9 @@ def participations(userID):
 @users.route("/register", methods=["POST"])
 def register():
     content = request.json
-    uid = str(uuid.uuid4())
 
-    if not content or not content["name"] or not content["email"] or not content["desc"]:
-        abort(400, "Request must include JSON body with name, email, and desc")
+    if not content or "name" not in content or "email" not in content or "desc" not in content or "userID" not in content:
+        abort(400, "Request must include JSON body with name, email, desc, and userID")
     
     taglist = [tag for tag in content["name"].lower().split()]
 
@@ -47,7 +46,7 @@ def register():
         "name": content["name"],
         "email": content["email"],
         "desc": content["desc"],
-        "userID": uid,
+        "userID": content["userID"],
         "enrollments": [],
         "mentorships": [],
         "tags": taglist,
