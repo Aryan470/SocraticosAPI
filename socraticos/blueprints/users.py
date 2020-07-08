@@ -53,5 +53,5 @@ def register():
         "admin": False
     }
 
-    fireClient.collection("users").document(uid).set(source)
+    fireClient.collection("users").document(content["userID"]).set(source)
     return source
