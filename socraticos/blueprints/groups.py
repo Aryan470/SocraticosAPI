@@ -136,7 +136,7 @@ def joinGroup(groupID):
     user_write = user_ref.set(user_info)
     group_write = group_ref.set(group_info)
 
-    return jsonify([user_write, group_write])
+    return jsonify({"user": str(user_write.update_time), "group": str(group_write.update_time)})
 
 
 @groups.route("/setPin/<groupID>/<messageID>", methods=["POST"])
