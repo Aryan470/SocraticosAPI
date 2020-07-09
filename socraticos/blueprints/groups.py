@@ -133,10 +133,10 @@ def joinGroup(groupID):
         user_info["mentorships"].append(groupID)
         group_info["mentors"].append(userID)
     
-    user_ref.set(user_info)
-    group_ref.set(group_info)
+    user_write = user_ref.set(user_info)
+    group_write = group_ref.set(group_info)
 
-    return jsonify(success=True)
+    return jsonify([user_write, group_write])
 
 
 @groups.route("/setPin/<groupID>/<messageID>", methods=["POST"])
