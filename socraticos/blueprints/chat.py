@@ -100,6 +100,7 @@ def logMessage(content: str, author: dict, groupID: str):
         "timestamp": timestamp,
         "authorID": author["userID"],
         "authorName": author["name"],
+        "isMentor": (groupID in author["mentorships"]),
         "content": content,
         "pinned": False
     }
