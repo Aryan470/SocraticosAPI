@@ -2,6 +2,7 @@ from flask import Blueprint, request, abort, jsonify, session
 from socraticos import fireClient
 from . import chat
 import uuid
+import datetime
 
 groups = Blueprint("groups", __name__)
 
@@ -138,6 +139,33 @@ def joinGroup(groupID):
 
     return {"success": True, "groupID": groupID}
 
+@groups.route("/reportMessage/<groupID>/<messageID>", methods=["POST"])
+def reportMessage(groupID, messageID):
+    if "userID" not in session:
+        abort(403, "Must be logged in to pin message")
+    
+    content = request.json
+    reason = "N/A"
+    if content and "reason" in content:
+        reason = content["reason"]
+    
+    group_ref = fireClient.collection("groups").document(groupID)
+    if not group_ref.get().exists:
+        abort(404, "Group not found")
+    
+    msg_ref = group_ref.collection("chatHistory").document(messageID)
+    msg_obj = msg_ref.get()
+    if not msg_obj.exists:
+        abort(404, "Message not found")
+    
+    report_dict = {"message": msg_obj.to_dict()}
+    report_dict["reportedBy"] = session["userID"]
+    report_dict["reportedAt"] = str(datetime.datetime.now())
+    report_dict["reason"] = reason
+
+    msg_id = report_dict["message"]["messageID"]
+    fireClient.collection("reports").document(msg_id).set(report_dict)
+    return {"success": True}
 
 @groups.route("/setPin/<groupID>/<messageID>", methods=["POST"])
 def pinMessage(groupID, messageID):
