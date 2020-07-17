@@ -167,6 +167,38 @@ def reportMessage(groupID, messageID):
     fireClient.collection("reports").document(msg_id).set(report_dict)
     return {"success": True}
 
+@groups.route("/groups/request/<groupID>", methods=["POST"])
+def requestGroup(groupID):
+    if "userID" not in session:
+        abort(403, "Must be logged in to request to join a group")
+    uid = session["userID"]
+
+    content = request.json
+    if not content or "role" not in content or content["role"].lower() != "student" or content["role"].lower() != "mentor":
+        abort(400, "Request must include JSON body with role (student/mentor)")
+    reason = "N/A"
+    if "reason" in content:
+        reason = content["reason"]
+    
+    role = content["role"].lower()
+    group_ref = fireClient.collection("groups").document(groupID)
+    group_obj = group_ref.get().to_dict()
+    if not group_obj.exists:
+        abort(404, "Group not found")
+    if uid in group_obj["mentors"] or uid in group_obj["students"]:
+        abort(400, "Cannot join group you are already in")
+    
+    # we make the request now
+    req_dict = {
+        "requestID": str(uuid.uuid4()),
+        "userID": uid,
+        "reason": reason,
+        "role": role
+    }
+
+    group_ref.collection("requests").document(req_dict["requestID"]).set(req_dict)
+    return req_dict
+
 @groups.route("/setPin/<groupID>/<messageID>", methods=["POST"])
 def pinMessage(groupID, messageID):
     if "userID" not in session:
