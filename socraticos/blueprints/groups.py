@@ -167,14 +167,14 @@ def reportMessage(groupID, messageID):
     fireClient.collection("reports").document(msg_id).set(report_dict)
     return {"success": True}
 
-@groups.route("/groups/request/<groupID>", methods=["POST"])
+@groups.route("/request/<groupID>", methods=["POST"])
 def requestGroup(groupID):
     if "userID" not in session:
         abort(403, "Must be logged in to request to join a group")
     uid = session["userID"]
 
     content = request.json
-    if not content or "role" not in content or content["role"].lower() != "student" or content["role"].lower() != "mentor":
+    if not content or "role" not in content or (content["role"].lower() != "student" and content["role"].lower() != "mentor"):
         abort(400, "Request must include JSON body with role (student/mentor)")
     reason = "N/A"
     if "reason" in content:
