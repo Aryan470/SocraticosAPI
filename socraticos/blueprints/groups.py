@@ -201,7 +201,17 @@ def requestGroup(groupID):
     group_ref.collection("requests").document(req_dict["requestID"]).set(req_dict)
     return req_dict
 
-@groups.route("/groups/requests/review/<groupID>/<requestID>", methods=["POST"])
+@groups.route("/viewrequests/<groupID>", methods=["POST"])
+def view_requests(groupID):
+    if "userID" not in session:
+        abort(403, "Must be logged in to view requests")
+    group_ref = fireClient.collection("groups").document(groupID)
+    if not group_ref.get().exists:
+        abort(404, "Group not found")
+    requests_stream = group_ref.collection("requests").stream()
+    return jsonify([request.to_dict() for request in requests_stream])
+
+@groups.route("/requests/review/<groupID>/<requestID>", methods=["POST"])
 def approveRequest(groupID, requestID):
     if "userID" not in session:
         abort(403, "Must be logged in to approve or deny request")
