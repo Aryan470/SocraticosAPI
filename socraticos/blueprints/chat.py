@@ -8,6 +8,15 @@ from .. import socketio
 from jose import jws
 from os import environ
 import json
+import urllib
+from socraticos.blueprints import groups
+
+def read_badwords():
+    with urllib.request.urlopen("https://raw.githubusercontent.com/LDNOOBW/List-of-Dirty-Naughty-Obscene-and-Otherwise-Bad-Words/master/en") as f:
+        badwords = [line.strip() for line in f]
+    return badwords
+
+badwords = read_badwords()
 
 @socketio.on("join")
 def on_join(data):
@@ -109,4 +118,7 @@ def logMessage(content: str, author: dict, groupID: str):
         groupRef.collection("chatHistory").document(messageID).set(source)
     else:
         raise FileNotFoundError("Group does not exist")
+    
+    if any(badword in content for badword in badwords):
+        groups.reportMessage(groupID, messageID)
     return source
